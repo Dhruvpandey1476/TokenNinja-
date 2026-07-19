@@ -104,8 +104,10 @@ def compress(chunks, query, max_tokens=700):
         emb = float(E[k] @ q)
         sl = s.lower()
         lex = (len([1 for w in qterms if w in sl]) / len(qterms)) if qterms else 0.0
-        num = 0.12 if _NUM.search(s) else 0.0            # keep sentences with figures
-        scores.append(emb + 0.35 * lex + num)
+        has_num = bool(_NUM.search(s))
+        num = 0.15 if has_num else 0.0                   # keep sentences with figures
+        combo = 0.25 if (has_num and lex > 0) else 0.0   # "answer sentence": figure + query term
+        scores.append(emb + 0.40 * lex + num + combo)
     order = list(np.argsort(-np.array(scores)))
 
     def _tok(s): return max(1, len(s) // 4)

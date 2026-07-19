@@ -16,7 +16,7 @@ Usage:
   python -m evaluation.round3_benchmark --ablation
 """
 
-import os, sys, json, time, argparse, logging, statistics
+import os, sys, json, time, argparse, logging, statistics, subprocess
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
@@ -71,10 +71,11 @@ def run_graphrag(gr, q, **kw):
 
 
 # ── Judge: strict pass/fail + graded 0-3 + evidence-support + citation — blind ─
-JUDGE = """You are a strict, impartial grader. Grade the CANDIDATE against the REFERENCE.
+JUDGE = """You are a strict, impartial grader for a FACTUAL filings-QA benchmark. Grade the CANDIDATE ONLY on whether it contains the specific facts and figures in the REFERENCE answer.
+A fluent or plausible answer that does NOT match the reference's specific facts/figures is WRONG (grade 0-1), even if it sounds reasonable — do NOT reward unverified guesses.
 Return ONLY JSON: {{"grade":<0|1|2|3>,"pass":<true|false>,"supported":<true|false>,"cite":<0|1|2>,"reason":"<short>"}}
-grade 3=fully correct, 2=mostly, 1=partial, 0=incorrect. pass=true ONLY if fully correct.
-supported=true if the candidate's key claims are backed by the EVIDENCE shown.
+grade 3=all key facts/figures match the reference, 2=most match, 1=partial, 0=wrong or missing the key fact. pass=true ONLY if fully correct.
+supported=true if the candidate's key claims appear in the EVIDENCE shown.
 cite: 2=correct source ids cited, 1=partial, 0=none/wrong.
 QUESTION: {q}
 REFERENCE: {ref}
@@ -124,6 +125,19 @@ def bertscore(cands, refs):
 
 def cost(pt, ot):
     return round(pt/1000*COST_IN + ot/1000*COST_OUT, 6)
+
+
+def git_info():
+    """Capture the exact code version so every result is traceable to a commit."""
+    def _g(args):
+        try:
+            return subprocess.check_output(["git"] + args, text=True, stderr=subprocess.DEVNULL).strip()
+        except Exception:
+            return "unknown"
+    return {"commit": _g(["rev-parse", "HEAD"]),
+            "commit_short": _g(["rev-parse", "--short", "HEAD"]),
+            "repo": _g(["config", "--get", "remote.origin.url"]),
+            "dirty": bool(_g(["status", "--porcelain"]))}
 
 
 def evaluate(questions, rag, gr, gr_kwargs=None, label="graphrag"):
@@ -216,6 +230,8 @@ def main():
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
+    GIT = git_info()
+    logger.info(f"[GIT] repo={GIT['repo']} commit={GIT['commit_short']} dirty={GIT['dirty']}")
     qs = json.load(open(EVAL, encoding="utf-8"))
     # dev/test split: stratified, deterministic (odd index=dev, even=test) — tune on dev only
     if args.split == "dev":   qs = [q for i, q in enumerate(qs) if i % 3 == 0]
@@ -249,7 +265,7 @@ def main():
         logger.info(f"=== RUN {run+1}/{args.runs} ===")
         rows = evaluate(qs, rag, gr)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        json.dump({"aggregate": aggregate(rows), "per_question": rows},
+        json.dump({"git": GIT, "aggregate": aggregate(rows), "per_question": rows},
                   open(OUT / f"run_{run+1}_{ts}.json", "w", encoding="utf-8"), indent=2, ensure_ascii=False)
         runs.append(aggregate(rows))
         logger.info(f"[SAVED] run {run+1}")
@@ -263,7 +279,7 @@ def main():
                  "are INFERENCE tokens only."),
     }
     # mean + variance across runs
-    summary = {"runs": args.runs, "split": args.split, "ingestion_one_time": ingestion, "per_run": runs}
+    summary = {"git": GIT, "runs": args.runs, "split": args.split, "ingestion_one_time": ingestion, "per_run": runs}
     if len(runs) > 1:
         keys = ["avg_total_inference_tokens", "strict_pass_pct", "avg_bertscore_f1", "avg_grade"]
         summary["mean_variance"] = {
