@@ -70,29 +70,30 @@ def run_graphrag(gr, q, **kw):
             "citations": r.retrieved_docs, "evidence": r.evidence, "latency_ms": r.latency_ms, "used_graph": r.used_graph}
 
 
-# ── Judge: strict pass/fail + graded 0-3 + evidence-support + citation — blind ─
+# ── Judge: EVIDENCE-BLIND, reference-only correctness (grade + pass) ──────────
+# Graded against the reference answer alone, identically for every pipeline and
+# blind to each pipeline's retrieved context — so no pipeline is advantaged or
+# penalised by how much context it carried. Support + citation are scored
+# deterministically below (reproducible, not by the LLM judge).
 JUDGE = """You are a strict, impartial grader for a FACTUAL filings-QA benchmark. Grade the CANDIDATE ONLY on whether it contains the specific facts and figures in the REFERENCE answer.
 A fluent or plausible answer that does NOT match the reference's specific facts/figures is WRONG (grade 0-1), even if it sounds reasonable — do NOT reward unverified guesses.
-Return ONLY JSON: {{"grade":<0|1|2|3>,"pass":<true|false>,"supported":<true|false>,"cite":<0|1|2>,"reason":"<short>"}}
+Return ONLY JSON: {{"grade":<0|1|2|3>,"pass":<true|false>,"reason":"<short>"}}
 grade 3=all key facts/figures match the reference, 2=most match, 1=partial, 0=wrong or missing the key fact. pass=true ONLY if fully correct.
-supported=true if the candidate's key claims appear in the EVIDENCE shown.
-cite: 2=correct source ids cited, 1=partial, 0=none/wrong.
 QUESTION: {q}
 REFERENCE: {ref}
-EVIDENCE: {ev}
 CANDIDATE: {cand}"""
 
-def judge(q, ref, cand, evidence=""):
+def judge(q, ref, cand):
     try:
         raw = gemini_generate("Return only valid JSON.",
-                              JUDGE.format(q=q, ref=ref, cand=cand, ev=(evidence or "(none)")[:1500]),
-                              temperature=0.0, max_tokens=200)["answer"].strip()
+                              JUDGE.format(q=q, ref=ref, cand=cand),
+                              temperature=0.0, max_tokens=150)["answer"].strip()
         raw = raw.replace("```json", "").replace("```", "").strip()
         d = json.loads(raw)
-        return int(d.get("grade", 0)), bool(d.get("pass", False)), bool(d.get("supported", False)), int(d.get("cite", 0))
+        return int(d.get("grade", 0)), bool(d.get("pass", False))
     except Exception as e:
         logger.warning(f"judge fail: {e}")
-        return 0, False, False, 0
+        return 0, False
 
 
 def _key_nums(s):
@@ -154,13 +155,19 @@ def evaluate(questions, rag, gr, gr_kwargs=None, label="graphrag"):
         res["graphrag"] = run_graphrag(gr, q, **gr_kwargs)
         gold = _gold_tickers(item.get("source_docs", ""))
         for p in ("llm_only", "rag", "graphrag"):
-            g, pas, sup, cite = judge(q, ref, res[p]["answer"], res[p].get("evidence", ""))
-            res[p]["grade"], res[p]["pass"], res[p]["supported"], res[p]["cite_score"] = g, pas, sup, cite
+            g, pas = judge(q, ref, res[p]["answer"])          # evidence-blind correctness
+            res[p]["grade"], res[p]["pass"] = g, pas
+            # Deterministic citation + support (reproducible, fair — not LLM-judged):
             got = _doc_tickers(res[p]["citations"])
             res[p]["citation_recall"] = round(len(gold & got) / len(gold), 3) if gold else None
             res[p]["citation_precision"] = round(len(gold & got) / len(got), 3) if got else None
-            # evidence-quality (0-1): half from judge citation grade, half from support
-            res[p]["evidence_quality"] = round(0.5 * (cite / 2) + 0.5 * (1.0 if sup else 0.0), 3)
+            ans_nums = _key_nums(res[p]["answer"])
+            ev_nums = _key_nums(res[p].get("evidence", ""))
+            support = 1.0 if (ans_nums and (ans_nums & ev_nums)) else (0.0 if ans_nums else None)
+            res[p]["supported"] = (support == 1.0) if support is not None else None
+            cite = res[p]["citation_recall"]
+            res[p]["cite_score"] = (2 if cite == 1 else 1 if (cite or 0) > 0 else 0) if cite is not None else 0
+            res[p]["evidence_quality"] = round(0.5 * (cite or 0) + 0.5 * (support if support is not None else 0), 3)
             res[p]["numeric_match"] = numeric_match(ref, res[p]["answer"]) if _key_nums(ref) else None
             res[p]["cost"] = cost(res[p]["prompt_tokens"], res[p]["output_tokens"])
         rows.append(res)
