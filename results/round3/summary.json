@@ -1,0 +1,289 @@
+{
+  "git": {
+    "commit": "d9dfc0e86cdb3ac611e3137d147294990986db64",
+    "commit_short": "d9dfc0e",
+    "repo": "https://github.com/Dhruvpandey1476/TokenNinja-.git",
+    "dirty": false
+  },
+  "runs": 3,
+  "split": "all",
+  "ingestion_one_time": {
+    "embedding_model": "all-MiniLM-L6-v2 (local)",
+    "embedding_api_tokens": 0,
+    "note": "Embeddings computed locally (sentence-transformers) = zero LLM/API tokens. Graph + vector index built once in TigerGraph. All per-question numbers above are INFERENCE tokens only."
+  },
+  "per_run": [
+    {
+      "llm_only": {
+        "numeric_match_pct": 15.4,
+        "avg_total_inference_tokens": 131.7,
+        "avg_context_tokens": 0.0,
+        "avg_system_tokens": 42.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 69.4,
+        "strict_pass_pct": 10.0,
+        "avg_grade": 0.68,
+        "avg_bertscore_f1": -0.0262,
+        "avg_evidence_quality": 0.0,
+        "supported_pct": 0.0,
+        "avg_citation_recall": 0.0,
+        "avg_latency_ms": 1258.1,
+        "avg_cost": 5.1e-05
+      },
+      "rag": {
+        "numeric_match_pct": 53.8,
+        "avg_total_inference_tokens": 4133.4,
+        "avg_context_tokens": 3496.2,
+        "avg_system_tokens": 103.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 70.1,
+        "strict_pass_pct": 22.0,
+        "avg_grade": 1.12,
+        "avg_bertscore_f1": -0.0163,
+        "avg_evidence_quality": 0.525,
+        "supported_pct": 60.0,
+        "avg_citation_recall": 0.804,
+        "avg_latency_ms": 1895.5,
+        "avg_cost": 0.000651
+      },
+      "graphrag": {
+        "numeric_match_pct": 61.5,
+        "avg_total_inference_tokens": 2034.4,
+        "avg_context_tokens": 1451.6,
+        "avg_system_tokens": 103.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 112.5,
+        "strict_pass_pct": 32.0,
+        "avg_grade": 1.38,
+        "avg_bertscore_f1": -0.0603,
+        "avg_evidence_quality": 0.733,
+        "supported_pct": 96.0,
+        "avg_citation_recall": 0.902,
+        "avg_latency_ms": 4363.4,
+        "avg_cost": 0.000356
+      },
+      "token_reduction_vs_rag_pct": 50.8,
+      "validity_ordering_ok": true,
+      "by_hop": {
+        "1": {
+          "n": 9,
+          "rag_grade": 2.22,
+          "graphrag_grade": 2.56,
+          "token_reduction_pct": 51.9
+        },
+        "2": {
+          "n": 20,
+          "rag_grade": 1.2,
+          "graphrag_grade": 1.35,
+          "token_reduction_pct": 51.7
+        },
+        "3+": {
+          "n": 21,
+          "rag_grade": 0.57,
+          "graphrag_grade": 0.9,
+          "token_reduction_pct": 49.3
+        }
+      }
+    },
+    {
+      "llm_only": {
+        "numeric_match_pct": 15.4,
+        "avg_total_inference_tokens": 132.1,
+        "avg_context_tokens": 0.0,
+        "avg_system_tokens": 42.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 69.7,
+        "strict_pass_pct": 10.0,
+        "avg_grade": 0.72,
+        "avg_bertscore_f1": -0.0192,
+        "avg_evidence_quality": 0.0,
+        "supported_pct": 0.0,
+        "avg_citation_recall": 0.0,
+        "avg_latency_ms": 1239.5,
+        "avg_cost": 5.1e-05
+      },
+      "rag": {
+        "numeric_match_pct": 61.5,
+        "avg_total_inference_tokens": 4137.7,
+        "avg_context_tokens": 3496.2,
+        "avg_system_tokens": 103.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 74.5,
+        "strict_pass_pct": 22.0,
+        "avg_grade": 1.18,
+        "avg_bertscore_f1": -0.0152,
+        "avg_evidence_quality": 0.515,
+        "supported_pct": 58.0,
+        "avg_citation_recall": 0.804,
+        "avg_latency_ms": 1555.4,
+        "avg_cost": 0.000654
+      },
+      "graphrag": {
+        "numeric_match_pct": 61.5,
+        "avg_total_inference_tokens": 2028.0,
+        "avg_context_tokens": 1448.7,
+        "avg_system_tokens": 103.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 110.2,
+        "strict_pass_pct": 32.0,
+        "avg_grade": 1.38,
+        "avg_bertscore_f1": -0.0644,
+        "avg_evidence_quality": 0.733,
+        "supported_pct": 96.0,
+        "avg_citation_recall": 0.902,
+        "avg_latency_ms": 4419.0,
+        "avg_cost": 0.000354
+      },
+      "token_reduction_vs_rag_pct": 51.0,
+      "validity_ordering_ok": true,
+      "by_hop": {
+        "1": {
+          "n": 9,
+          "rag_grade": 2.33,
+          "graphrag_grade": 2.56,
+          "token_reduction_pct": 52.0
+        },
+        "2": {
+          "n": 20,
+          "rag_grade": 1.25,
+          "graphrag_grade": 1.35,
+          "token_reduction_pct": 51.6
+        },
+        "3+": {
+          "n": 21,
+          "rag_grade": 0.62,
+          "graphrag_grade": 0.9,
+          "token_reduction_pct": 49.8
+        }
+      }
+    },
+    {
+      "llm_only": {
+        "numeric_match_pct": 15.4,
+        "avg_total_inference_tokens": 116.2,
+        "avg_context_tokens": 0.0,
+        "avg_system_tokens": 42.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 53.8,
+        "strict_pass_pct": 10.0,
+        "avg_grade": 0.64,
+        "avg_bertscore_f1": -0.0142,
+        "avg_evidence_quality": 0.0,
+        "supported_pct": 0.0,
+        "avg_citation_recall": 0.0,
+        "avg_latency_ms": 1170.2,
+        "avg_cost": 4.2e-05
+      },
+      "rag": {
+        "numeric_match_pct": 61.5,
+        "avg_total_inference_tokens": 4141.2,
+        "avg_context_tokens": 3496.2,
+        "avg_system_tokens": 103.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 78.0,
+        "strict_pass_pct": 22.0,
+        "avg_grade": 1.16,
+        "avg_bertscore_f1": -0.0201,
+        "avg_evidence_quality": 0.535,
+        "supported_pct": 62.0,
+        "avg_citation_recall": 0.804,
+        "avg_latency_ms": 1729.7,
+        "avg_cost": 0.000656
+      },
+      "graphrag": {
+        "numeric_match_pct": 61.5,
+        "avg_total_inference_tokens": 2039.6,
+        "avg_context_tokens": 1453.6,
+        "avg_system_tokens": 103.0,
+        "avg_question_tokens": 19.1,
+        "avg_output_tokens": 113.7,
+        "strict_pass_pct": 32.0,
+        "avg_grade": 1.38,
+        "avg_bertscore_f1": -0.0712,
+        "avg_evidence_quality": 0.733,
+        "supported_pct": 96.0,
+        "avg_citation_recall": 0.902,
+        "avg_latency_ms": 4557.7,
+        "avg_cost": 0.000357
+      },
+      "token_reduction_vs_rag_pct": 50.7,
+      "validity_ordering_ok": true,
+      "by_hop": {
+        "1": {
+          "n": 9,
+          "rag_grade": 2.22,
+          "graphrag_grade": 2.56,
+          "token_reduction_pct": 52.0
+        },
+        "2": {
+          "n": 20,
+          "rag_grade": 1.25,
+          "graphrag_grade": 1.35,
+          "token_reduction_pct": 51.5
+        },
+        "3+": {
+          "n": 21,
+          "rag_grade": 0.62,
+          "graphrag_grade": 0.9,
+          "token_reduction_pct": 49.3
+        }
+      }
+    }
+  ],
+  "mean_variance": {
+    "llm_only": {
+      "avg_total_inference_tokens": {
+        "mean": 126.667,
+        "stdev": 7.403
+      },
+      "strict_pass_pct": {
+        "mean": 10.0,
+        "stdev": 0.0
+      },
+      "avg_bertscore_f1": {
+        "mean": -0.02,
+        "stdev": 0.005
+      },
+      "avg_grade": {
+        "mean": 0.68,
+        "stdev": 0.033
+      }
+    },
+    "rag": {
+      "avg_total_inference_tokens": {
+        "mean": 4137.433,
+        "stdev": 3.19
+      },
+      "strict_pass_pct": {
+        "mean": 22.0,
+        "stdev": 0.0
+      },
+      "avg_bertscore_f1": {
+        "mean": -0.017,
+        "stdev": 0.002
+      },
+      "avg_grade": {
+        "mean": 1.153,
+        "stdev": 0.025
+      }
+    },
+    "graphrag": {
+      "avg_total_inference_tokens": {
+        "mean": 2034.0,
+        "stdev": 4.744
+      },
+      "strict_pass_pct": {
+        "mean": 32.0,
+        "stdev": 0.0
+      },
+      "avg_bertscore_f1": {
+        "mean": -0.065,
+        "stdev": 0.004
+      },
+      "avg_grade": {
+        "mean": 1.38,
+        "stdev": 0.0
+      }
+    }
+  }
+}
