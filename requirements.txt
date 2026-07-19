@@ -1,0 +1,10 @@
+pyTigerGraph>=1.8
+google-genai>=1.0
+sentence-transformers>=2.2
+tiktoken>=0.5
+numpy
+bert-score==0.3.13
+requests
+python-dotenv
+tqdm
+python-docx

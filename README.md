@@ -1,0 +1,46 @@
+# 🐯 TokenNinja — Round 3: Generalizable Context Optimization
+
+**TigerGraph GraphRAG Hackathon — Round 3.** Three pipelines compared head-to-head on the shared SP100 SEC-filings dataset, proving that graph-based retrieval + context optimization cuts **total inference tokens** while preserving answer quality.
+
+## Pipelines
+1. **LLM-Only** — question → Gemini, no retrieval (baseline floor).
+2. **Traditional RAG** — TigerGraph **vector** search (top-k) → Gemini.
+3. **Optimized GraphRAG** — TigerGraph vector search **+ graph traversal (2-hop fusion)** → deterministic context optimizer (dedup + MMR + graph-aware scoring + sentence compression) → Gemini.
+
+TigerGraph Savanna is used as **both the graph and vector database**. RAG and GraphRAG share the **same embedding model** (`all-MiniLM-L6-v2`) and the **same generation config** (Gemini 2.5 Flash, temperature 0, shared system prompt) — only retrieval + optimization differ.
+
+## Dataset
+`data/sp100_dataset/` — 100 S&P companies × {10-K, 8-K, DEF14A} SEC filings (heterogeneous: financial facts, governance, events). Eval set: `data/round3/round3_eval.json` (50 questions stratified by hop depth × fan-out).
+
+## Setup
+```bash
+pip install -r requirements.txt
+cp .env.example .env          # fill TigerGraph + Gemini credentials
+```
+
+## Run
+```bash
+# 1. Build chunks + graph backbone from the corpus ($0, offline)
+python -m scripts.round3_ingest
+
+# 2. Load schema + graph + vectors into TigerGraph Savanna
+python -m scripts.round3_load_tigergraph
+
+# 3. Benchmark (tune on dev, then held-out test, 3 runs)
+python -m evaluation.round3_benchmark --split dev
+python -m evaluation.round3_benchmark --split all --runs 3
+
+# 4. Ablation (contribution of graph / optimizer / compression)
+python -m evaluation.round3_benchmark --ablation
+```
+
+## What the result files contain (per question × pipeline)
+Answer · retrieved doc/chunk ids (citations) · evidence supplied · token breakdown (system / question / context / output / total-inference) · BERTScore F1 (`roberta-large`, rescaled) · strict pass + graded LLM-judge · evidence/citation-quality · deterministic numeric-match · latency. Plus per-hop breakdown, aggregate, ingestion cost (reported separately), and 3-run mean/variance.
+
+## Key design choices
+- **Context optimizer is deterministic** → zero extra inference tokens.
+- **Adaptive budget** → single-hop stays tight; high-fan-out aggregation gets room for one fact per company.
+- **2-hop fusion** → bridge questions (e.g. "the company that acquired X → its auditor") retrieve the second entity's filings.
+- **Fair comparison** → same model, temperature, output cap, and core system instruction across all pipelines; every pipeline-specific difference is disclosed and ablated.
+
+*Built for the TigerGraph GraphRAG Hackathon. #GraphRAGInferenceHackathon*

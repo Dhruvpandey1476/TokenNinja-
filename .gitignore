@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+# large regeneratable artifact (rebuild with scripts/round3_ingest.py)
+data/round3/chunks.jsonl
+data/round3/_token_count.json
+results/
+*.pkl
+.DS_Store
+.ipynb_checkpoints/
