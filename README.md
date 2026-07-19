@@ -71,4 +71,12 @@ Answer · retrieved doc/chunk ids (citations) · evidence supplied · token brea
 - **2-hop fusion** → bridge questions (e.g. "the company that acquired X → its auditor") retrieve the second entity's filings.
 - **Fair comparison** → same model, temperature, output cap, and core system instruction across all pipelines; every pipeline-specific difference is disclosed and ablated.
 
+## Deliverables
+- **Evaluation dashboard:** [`docs/dashboard.html`](docs/dashboard.html) — 3-pipeline comparison, per-hop, ablation (open in a browser)
+- **Live 3-pipeline app:** `python -m scripts.query "your question"` — runs LLM-Only vs RAG vs GraphRAG side-by-side
+- **Architecture & tech stack:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- **Methodology presentation:** [`docs/presentation.html`](docs/presentation.html) (arrow keys / click to navigate)
+- **Blog / social post:** [`docs/BLOG.md`](docs/BLOG.md)
+- **Raw results:** `results/round3/` — `run_1..3.json`, `summary.json`, `ablation.json`, `report.md`, `report.csv`
+
 *Built for the TigerGraph GraphRAG Hackathon. #GraphRAGInferenceHackathon*

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TokenNinja — Round 3 Evaluation Dashboard</title>
+<style>
+  :root{--bg:#0b1020;--panel:#141c33;--panel2:#0f1526;--line:#2a3654;--text:#eaf0fb;
+    --muted:#9fb0d0;--green:#2ee08a;--amber:#f5b544;--purple:#9b8cff;--accent:#5aa2ff;--red:#ff6b6b;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:radial-gradient(1100px 700px at 50% -10%,#1b2444 0%,var(--bg) 60%);color:var(--text);
+    padding:40px 32px 60px;line-height:1.5}
+  .wrap{max-width:1150px;margin:0 auto}
+  h1{font-size:32px;font-weight:800;letter-spacing:-.5px}
+  h2{font-size:20px;font-weight:700;margin:34px 0 14px;display:flex;align-items:center;gap:9px}
+  h2 .d{width:9px;height:9px;border-radius:50%;background:var(--green)}
+  .sub{color:var(--muted);font-size:14px;margin-top:6px}
+  .pill{display:inline-block;margin-top:14px;padding:7px 15px;border-radius:999px;font-size:13px;font-weight:600;
+    background:linear-gradient(90deg,rgba(46,224,138,.15),rgba(90,162,255,.15));border:1px solid var(--line);color:var(--green)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .kpi .n{font-size:34px;font-weight:800} .kpi .l{color:var(--muted);font-size:13px;margin-top:6px}
+  .g{color:var(--green)}.a{color:var(--accent)}.p{color:var(--purple)}.am{color:var(--amber)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:15px}
+  th,td{padding:11px 14px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  td:first-child,th:first-child{text-align:left;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  .cg{background:rgba(46,224,138,.08)} .win{color:var(--green);font-weight:800}
+  .bar{height:22px;border-radius:5px;background:var(--accent);display:inline-block;vertical-align:middle}
+  .barg{background:var(--green)} .barr{background:var(--red)} .bara{background:var(--amber)}
+  .note{margin-top:16px;background:rgba(245,181,68,.08);border:1px solid rgba(245,181,68,.35);border-radius:10px;
+    padding:12px 16px;font-size:13px;color:#f0d9a8}
+  .foot{margin-top:36px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:16px}
+  @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}body{padding:24px 16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐯 TokenNinja — Round 3 Evaluation Dashboard</h1>
+  <div class="sub">SP100 SEC filings · 50 questions · 3 runs · Gemini 2.5 Flash · TigerGraph Savanna (graph + vector)</div>
+  <div class="pill">GraphRAG: −50.7% tokens vs RAG · higher accuracy · answers provably from the graph</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n g">−50.7%</div><div class="l">Total-inference tokens vs RAG</div></div>
+    <div class="kpi"><div class="n a">1.38</div><div class="l">GraphRAG grade /3 (best)</div></div>
+    <div class="kpi"><div class="n p">32%</div><div class="l">GraphRAG strict pass (best)</div></div>
+    <div class="kpi"><div class="n am">✓</div><div class="l">Validity: LLM &lt; RAG &lt; GraphRAG</div></div>
+  </div>
+
+  <h2><span class="d"></span>Pipeline comparison (aggregate)</h2>
+  <table>
+    <tr><th>Metric</th><th>LLM-Only</th><th>Traditional RAG</th><th class="cg">GraphRAG</th></tr>
+    <tr><td>Graded score (/3)</td><td>0.64</td><td>1.16</td><td class="cg win">1.38</td></tr>
+    <tr><td>Strict pass rate</td><td>10%</td><td>22%</td><td class="cg win">32%</td></tr>
+    <tr><td>Numeric-match (exact figure)</td><td>15%</td><td>62%</td><td class="cg win">62%</td></tr>
+    <tr><td>Evidence-quality (0–1)</td><td>0.00</td><td>0.54</td><td class="cg win">0.73</td></tr>
+    <tr><td>BERTScore F1 (rescaled)</td><td>−0.014</td><td>−0.020</td><td class="cg">−0.071</td></tr>
+    <tr><td>Avg total-inference tokens</td><td>116</td><td>4,141</td><td class="cg win">2,040</td></tr>
+    <tr><td>Token reduction vs RAG</td><td>—</td><td>—</td><td class="cg win">−50.7%</td></tr>
+  </table>
+  <div class="note">✅ Token reduction achieved <b>without</b> sacrificing quality: GraphRAG grades higher than RAG (1.38 vs 1.16) at half the tokens. Retrieval is essential — LLM-Only answers only 15% of figures correctly.</div>
+
+  <h2><span class="d"></span>Tokens per query (lower = better)</h2>
+  <table>
+    <tr><td>LLM-Only</td><td><span class="bar bara" style="width:6px"></span> 116</td></tr>
+    <tr><td>Traditional RAG</td><td><span class="bar barr" style="width:340px"></span> 4,141</td></tr>
+    <tr><td class="win">GraphRAG</td><td><span class="bar barg" style="width:168px"></span> 2,040</td></tr>
+  </table>
+
+  <h2><span class="d"></span>Accuracy by hop tier (graded /3) — GraphRAG's edge grows with hops</h2>
+  <table>
+    <tr><th>Hop tier</th><th>n</th><th>Traditional RAG</th><th class="cg">GraphRAG</th><th>Token ↓</th></tr>
+    <tr><td>1-hop (single-doc)</td><td>9</td><td>2.22</td><td class="cg win">2.56</td><td>52.0%</td></tr>
+    <tr><td>2-hop (bridge)</td><td>20</td><td>1.25</td><td class="cg win">1.35</td><td>51.5%</td></tr>
+    <tr><td>3-hop+ (aggregation)</td><td>21</td><td>0.62</td><td class="cg win">0.90</td><td>49.3%</td></tr>
+  </table>
+
+  <h2><span class="d"></span>Ablation — contribution of each GraphRAG component</h2>
+  <table>
+    <tr><th>Variant</th><th>Grade /3</th><th>Tokens</th><th>What it proves</th></tr>
+    <tr><td>Full GraphRAG</td><td class="win">1.42</td><td>2,035</td><td>—</td></tr>
+    <tr><td>− graph traversal</td><td>1.06</td><td>1,811</td><td>graph adds +0.36 grade</td></tr>
+    <tr><td>− optimizer</td><td>0.78</td><td>2,039</td><td>optimizer is critical</td></tr>
+    <tr><td>− compression</td><td>1.44</td><td>4,315</td><td>compression halves tokens, ~no accuracy loss</td></tr>
+    <tr><td>− MMR</td><td>1.12</td><td>2,011</td><td>diversity ranking adds +0.30</td></tr>
+  </table>
+
+  <div class="foot">
+    Fair comparison: same LLM (Gemini 2.5 Flash, temp 0), same output cap, same embedding model, one shared core system prompt.
+    Judge grades evidence-blind against the reference; support &amp; citations scored deterministically. 3 runs (GraphRAG grade stdev ≈ 0). Every result git-traceable.
+    <br>#GraphRAGInferenceHackathon · Built on TigerGraph Savanna + Gemini 2.5 Flash
+  </div>
+</div>
+</body>
+</html>

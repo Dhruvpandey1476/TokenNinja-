@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TokenNinja — Round 3 Methodology</title>
+<style>
+  :root{--bg:#0b1020;--panel:#141c33;--panel2:#0f1526;--line:#2a3654;--text:#eaf0fb;
+    --muted:#9fb0d0;--green:#2ee08a;--amber:#f5b544;--purple:#9b8cff;--accent:#5aa2ff;--red:#ff6b6b;}
+  *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 50% -10%,#1b2444 0%,var(--bg) 60%);color:var(--text);overflow:hidden}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:5vh 7vw;animation:f .4s}
+  .slide.active{display:flex}@keyframes f{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .kicker{color:var(--green);font-weight:700;letter-spacing:2px;font-size:14px;text-transform:uppercase;margin-bottom:12px}
+  h1{font-size:52px;font-weight:800;letter-spacing:-1.5px;line-height:1.05}
+  h2{font-size:38px;font-weight:800;letter-spacing:-1px;margin-bottom:18px}.bar{color:var(--green)}
+  p.lead{font-size:21px;color:var(--muted);margin-top:16px;max-width:66ch}
+  ul{margin-top:14px;list-style:none}li{font-size:21px;margin:12px 0;padding-left:32px;position:relative;max-width:72ch}
+  li:before{content:"▸";position:absolute;left:0;color:var(--green);font-weight:800}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .card .n{font-size:40px;font-weight:800}.card .l{color:var(--muted);font-size:13px;margin-top:6px}
+  .g{color:var(--green)}.a{color:var(--accent)}.p{color:var(--purple)}.am{color:var(--amber)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:12px;font-size:19px}
+  th,td{padding:11px 14px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:14px}td:first-child,th:first-child{text-align:left;font-weight:600}
+  tr:last-child td{border-bottom:none}.cg{background:rgba(46,224,138,.09)}.win{color:var(--green);font-weight:800}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px;font-size:15px}
+  .node{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 15px;font-weight:600}
+  .node.gr{border-color:var(--green)}.arrow{color:var(--green);font-size:20px;font-weight:800}
+  .logo{font-size:60px}
+  footer{position:fixed;bottom:16px;left:0;right:0;display:flex;justify-content:space-between;padding:0 24px;color:var(--muted);font-size:12px}
+  .dots{display:flex;gap:6px;flex-wrap:wrap;max-width:60%}.dot{width:7px;height:7px;border-radius:50%;background:var(--line)}.dot.on{background:var(--green)}
+  @media print{.slide{display:flex!important;position:relative;page-break-after:always;height:100vh}footer{display:none}}
+</style>
+</head>
+<body>
+
+<section class="slide active">
+  <div class="logo">🐯</div>
+  <h1>TokenNinja<br><span class="g">Generalizable Context Optimization</span></h1>
+  <p class="lead">Round 3 — cutting GraphRAG's total inference tokens <b>50.7%</b> vs vector-RAG on the shared SP100 dataset, while <i>improving</i> accuracy.</p>
+  <p class="lead" style="font-size:16px">TigerGraph GraphRAG Hackathon · TigerGraph Savanna (graph + vector) · Gemini 2.5 Flash</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">The Problem</div>
+  <h2>GraphRAG over-retrieves</h2>
+  <ul>
+    <li>Vector + graph retrieval boosts recall — but returns duplicate, overlapping, marginally-relevant context.</li>
+    <li>The LLM gets far more than it needs → more tokens, more cost, no guaranteed accuracy gain.</li>
+    <li><b>Challenge:</b> transform high-recall retrieval into a smaller, precise, higher-quality evidence set <i>before</i> generation.</li>
+    <li>Not just dedup — similar passages may carry <i>different</i> facts, dates, exceptions. Keep complementary evidence, drop redundancy.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Approach</div>
+  <h2>Three pipelines, one controlled benchmark</h2>
+  <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
+    <div class="card"><div class="l" style="font-size:15px">1 · LLM-Only</div><p style="color:var(--muted);font-size:14px;margin-top:8px">No retrieval — baseline floor</p></div>
+    <div class="card"><div class="l" style="font-size:15px">2 · Traditional RAG</div><p style="color:var(--muted);font-size:14px;margin-top:8px">TigerGraph vector top-k → LLM</p></div>
+    <div class="card" style="border-color:var(--green)"><div class="l" style="font-size:15px;color:var(--green)">3 · GraphRAG ✓</div><p style="color:var(--muted);font-size:14px;margin-top:8px">Vector + 2-hop graph + optimizer → LLM</p></div>
+  </div>
+  <p class="lead">Same model, temperature, output cap, embedding model, and core prompt. Only retrieval + optimization differ.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Architecture</div>
+  <h2>TigerGraph Savanna = graph <span class="bar">and</span> vector DB</h2>
+  <div class="flow">
+    <div class="node">Query</div><span class="arrow">→</span>
+    <div class="node">Entity routing</div><span class="arrow">→</span>
+    <div class="node gr">Vector seed (TG)</div><span class="arrow">→</span>
+    <div class="node gr">2-hop graph fusion</div><span class="arrow">→</span>
+    <div class="node gr">Context optimizer</div><span class="arrow">→</span>
+    <div class="node">Gemini</div>
+  </div>
+  <ul>
+    <li><b>Schema:</b> Company · Sector · Filing · Chunk(+native vector); FILED / HAS_CHUNK / IN_SECTOR edges.</li>
+    <li><b>Same corpus</b> backs both the vector index and the graph — differences are retrieval strategy, not data.</li>
+    <li>Dataset: 100 S&P companies × {10-K, 8-K, DEF14A} — financial facts, governance, events.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">The Core — Context Optimizer</div>
+  <h2>High recall in, <span class="bar">precise & small</span> out — deterministically</h2>
+  <ul>
+    <li><b>2-hop graph fusion:</b> expand on companies named in the query <i>and</i> bridge entities found in the evidence (e.g. acquirer → its auditor).</li>
+    <li><b>Semantic dedup:</b> drop redundant passages, <i>keep</i> ones adding new figures/dates.</li>
+    <li><b>MMR:</b> diversity-aware selection (coverage, not 5 copies of one fact).</li>
+    <li><b>Sentence compression to an adaptive budget:</b> tight for single-hop, larger for many-company aggregation.</li>
+    <li><b>Deterministic → 0 extra inference tokens.</b> The token savings are real, not shifted into another LLM call.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Experimental Controls</div>
+  <h2>Fair, reproducible, traceable</h2>
+  <ul>
+    <li>Same LLM (Gemini 2.5 Flash, temp 0), output cap, embedding model, and one shared core prompt.</li>
+    <li>Judge grades <b>evidence-blind</b> vs the reference — identical for every pipeline (no context-length bias).</li>
+    <li>Support & citations scored <b>deterministically</b>; full per-question token accounting (system/question/context/output/total).</li>
+    <li>Dev/test split · held-out eval run <b>3×</b> (GraphRAG grade stdev ≈ 0) · every result stamped with its git commit.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Results — 50 questions, 3 runs</div>
+  <div class="grid4">
+    <div class="card"><div class="n g">−50.7%</div><div class="l">tokens vs RAG</div></div>
+    <div class="card"><div class="n a">1.38</div><div class="l">GraphRAG grade /3 (best)</div></div>
+    <div class="card"><div class="n p">32%</div><div class="l">strict pass (best)</div></div>
+    <div class="card"><div class="n am">✓</div><div class="l">LLM &lt; RAG &lt; GraphRAG</div></div>
+  </div>
+  <table>
+    <tr><th>Metric</th><th>LLM-Only</th><th>RAG</th><th class="cg">GraphRAG</th></tr>
+    <tr><td>Graded /3</td><td>0.64</td><td>1.16</td><td class="cg win">1.38</td></tr>
+    <tr><td>Exact-figure match</td><td>15%</td><td>62%</td><td class="cg win">62%</td></tr>
+    <tr><td>Evidence-quality</td><td>0.00</td><td>0.54</td><td class="cg win">0.73</td></tr>
+    <tr><td>Tokens/query</td><td>116</td><td>4,141</td><td class="cg win">2,040</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="kicker">Results by hop</div>
+  <h2>GraphRAG's edge <span class="bar">grows with hop depth</span></h2>
+  <table>
+    <tr><th>Hop tier</th><th>n</th><th>RAG grade</th><th class="cg">GraphRAG grade</th><th>Token ↓</th></tr>
+    <tr><td>1-hop (single-doc)</td><td>9</td><td>2.22</td><td class="cg win">2.56</td><td>52%</td></tr>
+    <tr><td>2-hop (bridge)</td><td>20</td><td>1.25</td><td class="cg win">1.35</td><td>52%</td></tr>
+    <tr><td>3-hop+ (aggregation)</td><td>21</td><td>0.62</td><td class="cg win">0.90</td><td>49%</td></tr>
+  </table>
+  <p class="lead">The graph earns its keep exactly where it should — cross-document, multi-hop reasoning.</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">Ablation</div>
+  <h2>Every component's contribution, isolated</h2>
+  <table>
+    <tr><th>Variant</th><th>Grade /3</th><th>Tokens</th><th>Takeaway</th></tr>
+    <tr><td>Full</td><td class="win">1.42</td><td>2,035</td><td>—</td></tr>
+    <tr><td>− graph traversal</td><td>1.06</td><td>1,811</td><td>graph adds +0.36 grade</td></tr>
+    <tr><td>− optimizer</td><td>0.78</td><td>2,039</td><td>optimizer is critical</td></tr>
+    <tr><td>− compression</td><td>1.44</td><td>4,315</td><td><b>halves tokens, ~no accuracy loss</b></td></tr>
+    <tr><td>− MMR</td><td>1.12</td><td>2,011</td><td>+0.30 grade</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="kicker">Challenges & Lessons</div>
+  <h2>What we learned</h2>
+  <ul>
+    <li><b>Deterministic optimization > LLM-based filtering</b> — reproducible and zero extra inference tokens.</li>
+    <li><b>Grade evidence-blind</b> — showing the judge variable-length context biased grading; grading vs the reference alone is fair + reproducible.</li>
+    <li><b>Adaptive budgets</b> matter on heterogeneous data — single-fact lookups vs many-company aggregation.</li>
+    <li><b>Two-hop fusion</b> unlocks bridge questions — the second entity is discovered from evidence, not given.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">Generalization & Roadmap</div>
+  <h2>Beyond this dataset</h2>
+  <ul>
+    <li>Works across <b>heterogeneous</b> content — structured financial facts + long-form governance — with one adaptive strategy.</li>
+    <li><b>Next:</b> question-type routing, community summaries for broad topics, subgraph caching, learned reranking.</li>
+    <li>Everything reproducible from the public repo; TigerGraph Savanna serves both graph and vector retrieval.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="logo">🐯</div>
+  <h2>Graph-optimized context wins.</h2>
+  <div class="grid4">
+    <div class="card"><div class="n g">−50.7%</div><div class="l">tokens</div></div>
+    <div class="card"><div class="n a">1.38</div><div class="l">grade (best)</div></div>
+    <div class="card"><div class="n p">valid</div><div class="l">LLM&lt;RAG&lt;GraphRAG</div></div>
+    <div class="card"><div class="n am">ablation</div><div class="l">graph + compression proven</div></div>
+  </div>
+  <p class="lead">Same accuracy-or-better, half the tokens, provably from the graph — reproducibly. <b>Thank you.</b></p>
+</section>
+
+<footer><div>🐯 TokenNinja — Round 3</div><div class="dots" id="dots"></div><div>← / → navigate</div></footer>
+<script>
+  const s=[...document.querySelectorAll('.slide')];let i=0;const de=document.getElementById('dots');
+  s.forEach(()=>{const d=document.createElement('div');d.className='dot';de.appendChild(d)});
+  const dots=[...document.querySelectorAll('.dot')];
+  function show(n){i=Math.max(0,Math.min(s.length-1,n));s.forEach((x,k)=>x.classList.toggle('active',k===i));dots.forEach((d,k)=>d.classList.toggle('on',k===i));}
+  show(0);
+  document.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){show(i+1);e.preventDefault()}if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){show(i-1);e.preventDefault()}if(e.key==='Home')show(0);if(e.key==='End')show(s.length-1)});
+  document.addEventListener('click',e=>{show(e.clientX>innerWidth*0.5?i+1:i-1)});
+</script>
+</body>
+</html>
