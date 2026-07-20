@@ -2,10 +2,8 @@
 __pycache__/
 *.pyc
 *.pyo
-# large regeneratable artifact (rebuild with scripts/round3_ingest.py)
-data/round3/chunks.jsonl
+# chunks.jsonl + chunk_emb.npz are committed via Git LFS (see .gitattributes)
 data/round3/_token_count.json
-data/round3/chunk_emb.npz
 results/
 *.pkl
 .DS_Store
