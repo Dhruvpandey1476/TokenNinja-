@@ -67,7 +67,8 @@ def run_graphrag(gr, q, **kw):
     return {"answer": r.answer, "prompt_tokens": r.prompt_tokens, "output_tokens": r.completion_tokens,
             "system_tokens": _ST_RAG, "question_tokens": count_context_tokens(q), "context_tokens": r.context_tokens,
             "opt_tokens": r.extra_llm_tokens, "total_inference": r.total_tokens + r.extra_llm_tokens,
-            "citations": r.retrieved_docs, "evidence": r.evidence, "latency_ms": r.latency_ms, "used_graph": r.used_graph}
+            "citations": r.retrieved_docs, "evidence": r.evidence, "latency_ms": r.latency_ms,
+            "used_graph": r.used_graph, "timings": r.timings}
 
 
 # ── Judge: EVIDENCE-BLIND, reference-only correctness (grade + pass) ──────────
@@ -208,6 +209,14 @@ def aggregate(rows):
     base = agg["rag"]["avg_total_inference_tokens"] or 1
     agg["token_reduction_vs_rag_pct"] = round((base - agg["graphrag"]["avg_total_inference_tokens"])/base*100, 1)
     agg["validity_ordering_ok"] = (agg["llm_only"]["avg_grade"] <= agg["rag"]["avg_grade"] <= agg["graphrag"]["avg_grade"])
+    agg["latency_vs_rag_pct"] = round((agg["graphrag"]["avg_latency_ms"] - agg["rag"]["avg_latency_ms"])
+                                      / (agg["rag"]["avg_latency_ms"] or 1) * 100, 1)
+    # GraphRAG per-stage latency breakdown (avg ms) — shows exactly where time goes.
+    tk = [r["graphrag"].get("timings") for r in rows if r["graphrag"].get("timings")]
+    if tk:
+        agg["graphrag_latency_breakdown_ms"] = {
+            k: round(sum(t.get(k, 0) for t in tk) / len(tk), 1)
+            for k in ("retrieval_ms", "optimize_ms", "compress_ms", "llm_ms")}
 
     # Per-hop breakdown — shows GraphRAG's structural advantage on multi-hop /
     # aggregation questions (the eval set is stratified by hop x fan-out).
@@ -254,6 +263,19 @@ def main():
     tg = TigerGraphClient().connect()
     rag, gr = BasicRAGTigerGraph(tg), GraphRAGTG(tg)
 
+    # Warm-up (NOT timed): load the embedder, wake the Savanna workspace, and prime
+    # one tiny LLM call so the FIRST real question isn't charged a one-off cold-start
+    # penalty (e.g. a 20s+ workspace-wake). This is standard steady-state latency
+    # measurement — it runs before timing and affects every pipeline identically, so
+    # it introduces no bias; it only removes a startup artefact from the averages.
+    try:
+        logger.info("[WARMUP] priming embedder + workspace + LLM (not timed)...")
+        rag.store.vector_search("warmup", k=1)
+        gemini_generate(SYS_LLM, "ok", temperature=0.0, max_tokens=1)
+        logger.info("[WARMUP] done")
+    except Exception as e:
+        logger.warning(f"[WARMUP] skipped: {e}")
+
     if args.ablation:
         variants = {"full": {}, "no_graph": {"use_graph": False},
                     "no_optimizer": {"use_optimizer": False}, "no_compress": {"use_compress": False},
@@ -282,8 +304,10 @@ def main():
         "embedding_model": "all-MiniLM-L6-v2 (local)",
         "embedding_api_tokens": 0,
         "note": ("Embeddings computed locally (sentence-transformers) = zero LLM/API tokens. "
-                 "Graph + vector index built once in TigerGraph. All per-question numbers above "
-                 "are INFERENCE tokens only."),
+                 "Graph + vector index built once in TigerGraph. Chunk embeddings are also "
+                 "precomputed once at index time (scripts/build_embedding_cache.py) and reused "
+                 "at inference — a standard index-time optimization, 0 API tokens, identical "
+                 "vectors. All per-question numbers above are INFERENCE tokens only."),
     }
     # mean + variance across runs
     summary = {"git": GIT, "runs": args.runs, "split": args.split, "ingestion_one_time": ingestion, "per_run": runs}

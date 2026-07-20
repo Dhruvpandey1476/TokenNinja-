@@ -12,7 +12,7 @@ Three mechanisms (each independently toggleable for ablation):
 
 import re
 import numpy as np
-from ..graph.tigergraph_vector import embed, embed_batch
+from ..graph.tigergraph_vector import embed, embed_batch, embed_batch_np
 
 _NUM = re.compile(r"\$?\d[\d,\.]*\s?(?:million|billion|bn|m|b|%|k)?", re.I)
 
@@ -33,8 +33,8 @@ def optimize(candidates, query, top_n=6, dedup_thresh=0.90, mmr_lambda=0.6,
     if not candidates:
         return [], []
     texts = [c["text"] for c in candidates]
-    E = _norm(embed_batch(texts))
-    q = _norm(embed(query))
+    E = _norm(embed_batch_np(texts))
+    q = _norm(np.asarray(embed(query), dtype="float32"))
     rel = E @ q  # cosine relevance to the query
 
     if use_graph:  # graph-derived boost: passages from graph-selected entities
@@ -96,8 +96,8 @@ def compress(chunks, query, max_tokens=700):
                 sents.append((c.get("id"), s))
     if not sents:
         return "", []
-    E = _norm(embed_batch([s for _, s in sents]))
-    q = _norm(embed(query))
+    E = _norm(embed_batch_np([s for _, s in sents]))
+    q = _norm(np.asarray(embed(query), dtype="float32"))
     qterms = {w for w in re.findall(r"[a-z0-9]{4,}", query.lower())}
     scores = []
     for k, (cid, s) in enumerate(sents):

@@ -5,7 +5,11 @@ __pycache__/
 # large regeneratable artifact (rebuild with scripts/round3_ingest.py)
 data/round3/chunks.jsonl
 data/round3/_token_count.json
+data/round3/chunk_emb.npz
 results/
 *.pkl
 .DS_Store
 .ipynb_checkpoints/
+# frontend build + deps (regeneratable via npm install / npm run build)
+node_modules/
+frontend/dist/
