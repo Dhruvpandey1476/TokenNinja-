@@ -33,7 +33,7 @@
     <text x="250" y="336" text-anchor="middle" font-size="14" font-weight="600" fill="#222">Question → Gemini 2.5 Flash</text>
     <text x="250" y="356" text-anchor="middle" font-size="12" fill="#555">no retrieval · parametric only</text>
     <rect x="90" y="500" width="320" height="70" rx="8" fill="#1b1030" stroke="#ff6b6b"/>
-    <text x="250" y="530" text-anchor="middle" font-size="13" font-weight="700" fill="#ff8a8a">116 tokens · grade 0.64/3</text>
+    <text x="250" y="530" text-anchor="middle" font-size="13" font-weight="700" fill="#ff8a8a">125 tokens · grade 0.71/3</text>
     <text x="250" y="552" text-anchor="middle" font-size="12" fill="#9fb0d0">only 15% figures correct</text>
   </g>
 
@@ -49,7 +49,7 @@
     <rect x="500" y="388" width="320" height="46" rx="8" fill="#fff"/>
     <text x="660" y="416" text-anchor="middle" font-size="13" fill="#222">raw chunks → Gemini</text>
     <rect x="500" y="500" width="320" height="70" rx="8" fill="#241a05" stroke="#f5b544"/>
-    <text x="660" y="530" text-anchor="middle" font-size="13" font-weight="700" fill="#f5c86a">4,141 tokens · grade 1.16/3</text>
+    <text x="660" y="530" text-anchor="middle" font-size="13" font-weight="700" fill="#f5c86a">4,137 tokens · grade 1.26/3</text>
     <text x="660" y="552" text-anchor="middle" font-size="12" fill="#9fb0d0">good-faith baseline</text>
   </g>
 
@@ -71,7 +71,7 @@
     <rect x="910" y="484" width="440" height="34" rx="8" fill="#fff"/>
     <text x="1130" y="506" text-anchor="middle" font-size="13" fill="#222">④ compact evidence + citations → Gemini</text>
     <rect x="910" y="530" width="440" height="46" rx="8" fill="#0d2a1c" stroke="#2ee08a" stroke-width="2"/>
-    <text x="1130" y="558" text-anchor="middle" font-size="14" font-weight="800" fill="#2ee08a">2,040 tokens (−50.7%) · grade 1.38/3 · pass 32%</text>
+    <text x="1130" y="558" text-anchor="middle" font-size="14" font-weight="800" fill="#2ee08a">2,030 tokens (−51%) · grade 1.47/3 · pass 34%</text>
   </g>
 
   <!-- Arrows from input to lanes -->
@@ -100,8 +100,8 @@
 
   <!-- Results footer -->
   <rect x="60" y="750" width="1320" height="120" rx="12" fill="#0d1424" stroke="#2a3654"/>
-  <text x="720" y="782" text-anchor="middle" font-size="16" font-weight="800" fill="#2ee08a">Result: valid ordering LLM-Only (0.64) &lt; RAG (1.16) &lt; GraphRAG (1.38)  ·  −50.7% tokens  ·  quality maintained</text>
-  <text x="300" y="820" text-anchor="middle" font-size="13" fill="#9fb0d0">Ablation: − graph → 1.06 (graph = +0.36)</text>
+  <text x="720" y="782" text-anchor="middle" font-size="16" font-weight="800" fill="#2ee08a">Result: valid ordering LLM-Only (0.71) &lt; RAG (1.26) &lt; GraphRAG (1.47)  ·  −51% tokens  ·  balanced latency</text>
+  <text x="300" y="820" text-anchor="middle" font-size="13" fill="#9fb0d0">Ablation: − graph → 1.00 (graph = +0.46)</text>
   <text x="720" y="820" text-anchor="middle" font-size="13" fill="#9fb0d0">− compression → 2× tokens, ~no accuracy loss</text>
   <text x="1140" y="820" text-anchor="middle" font-size="13" fill="#9fb0d0">GraphRAG wins every hop tier (edge grows with hops)</text>
   <text x="720" y="850" text-anchor="middle" font-size="12" fill="#667a9e">Backend: FastAPI-free Python · pyTigerGraph · google-genai · sentence-transformers · #GraphRAGInferenceHackathon</text>

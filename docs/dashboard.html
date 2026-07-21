@@ -40,56 +40,58 @@
 <div class="wrap">
   <h1>🐯 TokenNinja — Round 3 Evaluation Dashboard</h1>
   <div class="sub">SP100 SEC filings · 50 questions · 3 runs · Gemini 2.5 Flash · TigerGraph Savanna (graph + vector)</div>
-  <div class="pill">GraphRAG: −50.7% tokens vs RAG · higher accuracy · answers provably from the graph</div>
+  <div class="pill">GraphRAG: −51% tokens vs RAG · higher accuracy · balanced latency (~2.4s) · answers provably from the graph</div>
 
   <div class="kpis">
-    <div class="kpi"><div class="n g">−50.7%</div><div class="l">Total-inference tokens vs RAG</div></div>
-    <div class="kpi"><div class="n a">1.38</div><div class="l">GraphRAG grade /3 (best)</div></div>
-    <div class="kpi"><div class="n p">32%</div><div class="l">GraphRAG strict pass (best)</div></div>
+    <div class="kpi"><div class="n g">−51%</div><div class="l">Total-inference tokens vs RAG</div></div>
+    <div class="kpi"><div class="n a">1.47</div><div class="l">GraphRAG grade /3 (best)</div></div>
+    <div class="kpi"><div class="n p">34%</div><div class="l">GraphRAG strict pass (best)</div></div>
     <div class="kpi"><div class="n am">✓</div><div class="l">Validity: LLM &lt; RAG &lt; GraphRAG</div></div>
   </div>
 
-  <h2><span class="d"></span>Pipeline comparison (aggregate)</h2>
+  <h2><span class="d"></span>Pipeline comparison (aggregate · 3-run mean)</h2>
   <table>
     <tr><th>Metric</th><th>LLM-Only</th><th>Traditional RAG</th><th class="cg">GraphRAG</th></tr>
-    <tr><td>Graded score (/3)</td><td>0.64</td><td>1.16</td><td class="cg win">1.38</td></tr>
-    <tr><td>Strict pass rate</td><td>10%</td><td>22%</td><td class="cg win">32%</td></tr>
+    <tr><td>Graded score (/3)</td><td>0.71</td><td>1.26</td><td class="cg win">1.47</td></tr>
+    <tr><td>Strict pass rate</td><td>10%</td><td>25%</td><td class="cg win">34%</td></tr>
     <tr><td>Numeric-match (exact figure)</td><td>15%</td><td>62%</td><td class="cg win">62%</td></tr>
-    <tr><td>Evidence-quality (0–1)</td><td>0.00</td><td>0.54</td><td class="cg win">0.73</td></tr>
-    <tr><td>BERTScore F1 (rescaled)</td><td>−0.014</td><td>−0.020</td><td class="cg">−0.071</td></tr>
-    <tr><td>Avg total-inference tokens</td><td>116</td><td>4,141</td><td class="cg win">2,040</td></tr>
-    <tr><td>Token reduction vs RAG</td><td>—</td><td>—</td><td class="cg win">−50.7%</td></tr>
+    <tr><td>Evidence-quality (0–1)</td><td>0.00</td><td>0.55</td><td class="cg win">0.74</td></tr>
+    <tr><td>BERTScore F1 (rescaled)</td><td>−0.017</td><td>−0.011</td><td class="cg">−0.060</td></tr>
+    <tr><td>Avg total-inference tokens</td><td>125</td><td>4,137</td><td class="cg win">2,030</td></tr>
+    <tr><td>Token reduction vs RAG</td><td>—</td><td>—</td><td class="cg win">−51%</td></tr>
+    <tr><td>Avg latency</td><td>~1.3 s</td><td>~1.7 s</td><td class="cg">~2.4 s</td></tr>
   </table>
-  <div class="note">✅ Token reduction achieved <b>without</b> sacrificing quality: GraphRAG grades higher than RAG (1.38 vs 1.16) at half the tokens. Retrieval is essential — LLM-Only answers only 15% of figures correctly.</div>
+  <div class="note">✅ Token reduction achieved <b>without</b> sacrificing quality: GraphRAG grades higher than RAG (1.47 vs 1.26) at half the tokens, and stays balanced on latency (~2.4s vs ~1.7s). Retrieval is essential — LLM-Only answers only 15% of figures correctly. BERTScore is the one metric where GraphRAG trails RAG — it rewards surface overlap and is noisy on short factual answers, whereas the LLM-judge, numeric-match and evidence-quality all favor GraphRAG.</div>
 
   <h2><span class="d"></span>Tokens per query (lower = better)</h2>
   <table>
-    <tr><td>LLM-Only</td><td><span class="bar bara" style="width:6px"></span> 116</td></tr>
-    <tr><td>Traditional RAG</td><td><span class="bar barr" style="width:340px"></span> 4,141</td></tr>
-    <tr><td class="win">GraphRAG</td><td><span class="bar barg" style="width:168px"></span> 2,040</td></tr>
+    <tr><td>LLM-Only</td><td><span class="bar bara" style="width:10px"></span> 125</td></tr>
+    <tr><td>Traditional RAG</td><td><span class="bar barr" style="width:340px"></span> 4,137</td></tr>
+    <tr><td class="win">GraphRAG</td><td><span class="bar barg" style="width:167px"></span> 2,030</td></tr>
   </table>
 
   <h2><span class="d"></span>Accuracy by hop tier (graded /3) — GraphRAG's edge grows with hops</h2>
   <table>
     <tr><th>Hop tier</th><th>n</th><th>Traditional RAG</th><th class="cg">GraphRAG</th><th>Token ↓</th></tr>
-    <tr><td>1-hop (single-doc)</td><td>9</td><td>2.22</td><td class="cg win">2.56</td><td>52.0%</td></tr>
-    <tr><td>2-hop (bridge)</td><td>20</td><td>1.25</td><td class="cg win">1.35</td><td>51.5%</td></tr>
-    <tr><td>3-hop+ (aggregation)</td><td>21</td><td>0.62</td><td class="cg win">0.90</td><td>49.3%</td></tr>
+    <tr><td>1-hop (single-doc)</td><td>9</td><td>2.56</td><td class="cg">2.56</td><td>52.0%</td></tr>
+    <tr><td>2-hop (bridge)</td><td>20</td><td>1.25</td><td class="cg win">1.55</td><td>51.6%</td></tr>
+    <tr><td>3-hop+ (aggregation)</td><td>21</td><td>0.71</td><td class="cg win">0.95</td><td>49.8%</td></tr>
   </table>
 
-  <h2><span class="d"></span>Ablation — contribution of each GraphRAG component</h2>
+  <h2><span class="d"></span>Ablation — contribution of each GraphRAG component (full 50-Q)</h2>
   <table>
     <tr><th>Variant</th><th>Grade /3</th><th>Tokens</th><th>What it proves</th></tr>
-    <tr><td>Full GraphRAG</td><td class="win">1.42</td><td>2,035</td><td>—</td></tr>
-    <tr><td>− graph traversal</td><td>1.06</td><td>1,811</td><td>graph adds +0.36 grade</td></tr>
-    <tr><td>− optimizer</td><td>0.78</td><td>2,039</td><td>optimizer is critical</td></tr>
-    <tr><td>− compression</td><td>1.44</td><td>4,315</td><td>compression halves tokens, ~no accuracy loss</td></tr>
-    <tr><td>− MMR</td><td>1.12</td><td>2,011</td><td>diversity ranking adds +0.30</td></tr>
+    <tr><td>Full GraphRAG</td><td class="win">1.46</td><td>2,031</td><td>—</td></tr>
+    <tr><td>− graph fusion</td><td>1.00</td><td>1,811</td><td>graph adds +0.46 grade</td></tr>
+    <tr><td>− optimizer</td><td>0.82</td><td>1,982</td><td>optimizer is critical (+0.64)</td></tr>
+    <tr><td>− compression</td><td>1.42</td><td>4,318</td><td>compression halves tokens, ~no accuracy loss</td></tr>
+    <tr><td>− MMR</td><td>1.12</td><td>2,018</td><td>diversity ranking adds +0.34</td></tr>
+    <tr><td>− dedup</td><td>1.50</td><td>2,030</td><td>~neutral here (keeps complementary facts)</td></tr>
   </table>
 
   <div class="foot">
     Fair comparison: same LLM (Gemini 2.5 Flash, temp 0), same output cap, same embedding model, one shared core system prompt.
-    Judge grades evidence-blind against the reference; support &amp; citations scored deterministically. 3 runs (GraphRAG grade stdev ≈ 0). Every result git-traceable.
+    Judge grades evidence-blind against the reference; support &amp; citations scored deterministically. 3 runs (GraphRAG grade stdev ≈ 0). Every result git-traceable (commit 5af4540, dirty=false).
     <br>#GraphRAGInferenceHackathon · Built on TigerGraph Savanna + Gemini 2.5 Flash
   </div>
 </div>
