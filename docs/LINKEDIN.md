@@ -8,15 +8,16 @@
 
 **What I built:** a pipeline that retrieves broadly, then optimizes the evidence **deterministically** — semantic dedup (keeping *complementary* facts, not just removing duplicates), MMR diversity ranking, graph-aware scoring, and adaptive sentence-level compression. Because it's deterministic, it adds **zero extra inference tokens**. TigerGraph Savanna does double duty as **both the graph and the vector database**, so vector search *and* multi-hop traversal happen in-database.
 
-**The results (50 questions, 3 runs):**
-✅ **−50.7% total inference tokens** vs traditional RAG
-✅ **Higher** accuracy, not lower — graded 1.38/3 vs RAG's 1.16, strict pass 32% vs 22%
-✅ Valid benchmark ordering: LLM-only (0.64) < RAG (1.16) < GraphRAG (1.38)
+**The results (50 questions, 3 runs, stdev ≈ 0):**
+✅ **−51% total inference tokens** vs traditional RAG
+✅ **Higher** accuracy, not lower — graded 1.47/3 vs RAG's 1.26, strict pass 34% vs 25%
+✅ Valid benchmark ordering: LLM-only (0.71) < RAG (1.26) < GraphRAG (1.47)
 ✅ GraphRAG wins **every** hop tier — and its edge grows with hop depth (the graph earns its keep on multi-hop reasoning)
+✅ And it's **balanced**, not token-obsessed: ~2.4s latency vs RAG's ~1.7s (embeddings precomputed at index time, so the optimizer adds ~0 query-time cost)
 
 **My favorite part — the ablation:**
-🔹 Remove the graph → accuracy drops 1.42 → 1.06 (the graph adds real accuracy)
-🔹 Remove compression → tokens *double* with ~no accuracy change (the savings are free)
+🔹 Remove the graph → accuracy drops 1.46 → 1.00 (the graph adds real accuracy)
+🔹 Remove compression → tokens *double* (2.0k → 4.3k) with ~no accuracy change (the savings are free)
 
 A few lessons that surprised me:
 • **Deterministic beats LLM-based** for context optimization — reproducible, and it doesn't spend the tokens you're trying to save.
