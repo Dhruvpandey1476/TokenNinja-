@@ -1,0 +1,12 @@
+# Lean runtime deps for the API server (no bert-score / docx / tqdm — those are
+# benchmark-only). torch is installed separately (CPU wheel) in the Dockerfile.
+pyTigerGraph>=1.8
+google-genai>=1.0
+sentence-transformers>=2.2
+tiktoken>=0.5
+numpy
+requests
+python-dotenv
+fastapi>=0.109
+uvicorn[standard]>=0.27
+pydantic>=2.0

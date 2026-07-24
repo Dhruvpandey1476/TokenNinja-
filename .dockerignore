@@ -1,0 +1,16 @@
+# Keep the backend build context small & fast. graph.json + chunk_emb.npz are
+# COPY'd explicitly in the Dockerfile, so they're allowed through below.
+.git
+node_modules
+frontend
+docs
+results
+scripts
+data/sp100_dataset
+data/round3/chunks.jsonl
+data/round3/round3_eval.json
+data/Round3_Eval_Questions_v3.docx
+**/__pycache__
+*.pyc
+*.pyo
+.env
